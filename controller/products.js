@@ -1,6 +1,4 @@
 const fs = require('fs');
-const data = JSON.parse(fs.readFileSync('data.json', 'utf-8'))
-const products = data.products;
 const model = require('../model/product');
 const Product = model.Product;
 
