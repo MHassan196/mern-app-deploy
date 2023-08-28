@@ -1,49 +1,52 @@
 const fs = require('fs');
+const model = require('../model/user')
+const mongoose = require('mongoose');
+const User = model.User;
 
-// const index = fs.readFileSync('index.html', 'utf-8')
-const path = require('path');
-const data = JSON.parse(fs.readFileSync(path.resolve(__dirname,'../data.json'), 'utf-8'))
-const users = data.users;
-
-exports.createUser = (req,res)=>{
-    console.log(req.body)
-    users.push(req.body)
-    res.json(req.body)
+exports.readAllUsers = async (req,res)=>{
+    const users = await User.find();
+    res.json(users);
 }
 
-exports.readAllUsers = (req,res)=>{
-    res.json(users)
+exports.readUser = async (req,res)=>{
+    const id = +req.params.id;
+    console.log({id});
+    const user = await User.findById(id);
+    res.json(user);
 }
 
-exports.readUser = (req,res)=>{
-    // console.log(req.params.id)
+exports.replaceUser = async (req,res)=>{
     const id = +req.params.id
-    const user = users.find(p=>p.id===id)
-    res.json(user)
+    try{
+        const doc = await User.findOneAndReplace({_id:id}, req.body, {new:true})
+        res.status(201).json(doc)
+    }
+    catch(err){
+        console.log(err)
+        res.status(400).json(err)
+    }
 }
 
-exports.replaceUser = (req,res)=>{
-    // console.log(req.params.id)
+exports.updateUser = async (req,res)=>{
     const id = +req.params.id
-    const userIndex = users.findIndex(p=>p.id===id)
-    users.splice(userIndex, 1, {...req.body, id:id})
-    res.status(201).json()
+    try{
+        const doc = await User.findOneAndUpdate({_id:id}, req.body, {new: true})
+        res.status(201).json(doc)
+    } catch(err){
+        console.log(err)
+        res.status(400).json(err)
+    }
 }
 
-exports.updateUser = (req,res)=>{
-    // console.log(req.params.id)
+exports.deleteUser = async (req,res)=>{
     const id = +req.params.id
-    const userIndex = users.findIndex(p=>p.id===id)
-    const user = users[userIndex]
-    users.splice(userIndex, 1, {...user,...req.body})
-    res.status(201).json()
-}
+    try{
+        const doc = await User.findOneAndDelete({_id:id})
+        res.status(201).json(doc)
+    }
+    catch(err){
+        console.log(err)
+        res.status(201).json(err)
 
-exports.deleteUser = (req,res)=>{
-    // console.log(req.params.id)
-    const id = +req.params.id
-    const userIndex = users.findIndex(p=>p.id===id)
-    const user = users[userIndex]
-    users.splice(userIndex, 1)
-    res.status(201).json(user)
+    }
 }
